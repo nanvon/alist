@@ -340,10 +340,11 @@ func FsGet(c *gin.Context) {
 				query = "?sign=" + sign.Sign(reqPath)
 			}
 			if storage.GetStorage().DownProxyUrl != "" {
-				rawURL = fmt.Sprintf("%s%s?sign=%s",
-					strings.Split(storage.GetStorage().DownProxyUrl, "\n")[0],
-					utils.EncodePath(reqPath, true),
-					sign.Sign(reqPath))
+				rawURL = common.BuildDownProxyURL(
+					storage.GetStorage().DownProxyUrl,
+					reqPath,
+					storage.GetStorage().DownProxySign,
+				)
 			} else {
 				rawURL = fmt.Sprintf("%s/p%s%s",
 					common.GetApiUrl(c.Request),
