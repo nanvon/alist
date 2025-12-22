@@ -6,14 +6,12 @@ import (
 	"io"
 	stdpath "path"
 	"strconv"
-	"strings"
 
 	"github.com/alist-org/alist/v3/internal/conf"
 	"github.com/alist-org/alist/v3/internal/driver"
 	"github.com/alist-org/alist/v3/internal/fs"
 	"github.com/alist-org/alist/v3/internal/model"
 	"github.com/alist-org/alist/v3/internal/setting"
-	"github.com/alist-org/alist/v3/internal/sign"
 	"github.com/alist-org/alist/v3/pkg/utils"
 	"github.com/alist-org/alist/v3/server/common"
 	"github.com/gin-gonic/gin"
@@ -62,10 +60,7 @@ func Proxy(c *gin.Context) {
 		if downProxyUrl != "" {
 			_, ok := c.GetQuery("d")
 			if !ok {
-				URL := fmt.Sprintf("%s%s?sign=%s",
-					strings.Split(downProxyUrl, "\n")[0],
-					utils.EncodePath(rawPath, true),
-					sign.Sign(rawPath))
+				URL := common.BuildDownProxyURL(downProxyUrl, rawPath, storage.GetStorage().DownProxySign)
 				c.Redirect(302, URL)
 				return
 			}

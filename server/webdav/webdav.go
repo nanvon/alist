@@ -21,7 +21,6 @@ import (
 	"github.com/alist-org/alist/v3/internal/errs"
 	"github.com/alist-org/alist/v3/internal/fs"
 	"github.com/alist-org/alist/v3/internal/model"
-	"github.com/alist-org/alist/v3/internal/sign"
 	"github.com/alist-org/alist/v3/pkg/utils"
 	"github.com/alist-org/alist/v3/server/common"
 )
@@ -253,10 +252,7 @@ func (h *Handler) handleGetHeadPost(w http.ResponseWriter, r *http.Request) (sta
 			return http.StatusInternalServerError, fmt.Errorf("webdav proxy error: %+v", err)
 		}
 	} else if storage.GetStorage().WebdavProxy() && downProxyUrl != "" {
-		u := fmt.Sprintf("%s%s?sign=%s",
-			strings.Split(downProxyUrl, "\n")[0],
-			utils.EncodePath(reqPath, true),
-			sign.Sign(reqPath))
+		u := common.BuildDownProxyURL(downProxyUrl, reqPath, storage.GetStorage().DownProxySign)
 		w.Header().Set("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
 		http.Redirect(w, r, u, http.StatusFound)
 	} else {
