@@ -29,15 +29,34 @@ func getRoleOptions() string {
 	return strings.Join(names, ",")
 }
 
+type SetTokenReq struct {
+	Token string `json:"token" form:"token" binding:"required"`
+}
+
 func ResetToken(c *gin.Context) {
 	token := random.Token()
-	item := model.SettingItem{Key: "token", Value: token, Type: conf.TypeString, Group: model.SINGLE, Flag: model.PRIVATE}
+	item := model.SettingItem{Key: conf.Token, Value: token, Type: conf.TypeString, Group: model.SINGLE, Flag: model.PRIVATE}
 	if err := op.SaveSettingItem(&item); err != nil {
 		common.ErrorResp(c, err, 500)
 		return
 	}
 	sign.Instance()
 	common.SuccessResp(c, token)
+}
+
+func SetToken(c *gin.Context) {
+	var req SetTokenReq
+	if err := c.ShouldBind(&req); err != nil {
+		common.ErrorResp(c, err, 400)
+		return
+	}
+	item := model.SettingItem{Key: conf.Token, Value: req.Token, Type: conf.TypeString, Group: model.SINGLE, Flag: model.PRIVATE}
+	if err := op.SaveSettingItem(&item); err != nil {
+		common.ErrorResp(c, err, 500)
+		return
+	}
+	sign.Instance()
+	common.SuccessResp(c, req.Token)
 }
 
 func GetSetting(c *gin.Context) {
