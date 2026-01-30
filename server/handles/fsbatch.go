@@ -10,6 +10,7 @@ import (
 	"github.com/alist-org/alist/v3/internal/model"
 	"github.com/alist-org/alist/v3/internal/op"
 	"github.com/alist-org/alist/v3/pkg/generic"
+	"github.com/alist-org/alist/v3/pkg/utils"
 	"github.com/alist-org/alist/v3/server/common"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -185,7 +186,15 @@ func FsBatchRename(c *gin.Context) {
 		if renameObject.SrcName == "" || renameObject.NewName == "" {
 			continue
 		}
-		filePath := fmt.Sprintf("%s/%s", reqPath, renameObject.SrcName)
+		if err := utils.ValidateNameComponent(renameObject.NewName); err != nil {
+			common.ErrorResp(c, err, 400)
+			return
+		}
+		filePath, err := utils.JoinUnderBase(reqPath, renameObject.SrcName)
+		if err != nil {
+			common.ErrorResp(c, err, 400)
+			return
+		}
 		if err := fs.Rename(c, filePath, renameObject.NewName); err != nil {
 			common.ErrorResp(c, err, 500)
 			return
@@ -247,8 +256,16 @@ func FsRegexRename(c *gin.Context) {
 	for _, file := range files {
 
 		if srcRegexp.MatchString(file.GetName()) {
-			filePath := fmt.Sprintf("%s/%s", reqPath, file.GetName())
+			filePath, err := utils.JoinUnderBase(reqPath, file.GetName())
+			if err != nil {
+				common.ErrorResp(c, err, 500)
+				return
+			}
 			newFileName := srcRegexp.ReplaceAllString(file.GetName(), req.NewNameRegex)
+			if err := utils.ValidateNameComponent(newFileName); err != nil {
+				common.ErrorResp(c, err, 400)
+				return
+			}
 			if err := fs.Rename(c, filePath, newFileName); err != nil {
 				common.ErrorResp(c, err, 500)
 				return
