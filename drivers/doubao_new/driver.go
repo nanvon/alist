@@ -304,8 +304,6 @@ func (d *DoubaoNew) Put(ctx context.Context, dstDir model.Obj, file model.FileSt
 				if len(data) < tailLen {
 					tailLen = len(data)
 				}
-				fmt.Printf("head32 = %x\n", data[:headLen])
-				fmt.Printf("tail32 = %x\n", data[len(data)-tailLen:])
 			}
 			if int64(len(data)) != expectLen {
 				return fmt.Errorf("[doubao_new] merge blocks invalid body len: got=%d expect=%d seqs=%v", len(data), expectLen, groupSeqs)
