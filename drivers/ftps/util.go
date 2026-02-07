@@ -3,6 +3,7 @@ package ftps
 import (
 	"crypto/tls"
 	"io"
+	"net"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -19,7 +20,13 @@ func (d *FTPS) login() error {
 		}
 	}
 
+	host, _, err := net.SplitHostPort(d.Address)
+	if err != nil {
+		host = d.Address
+	}
+
 	tlsConfig := &tls.Config{
+		ServerName:         host,
 		InsecureSkipVerify: d.TLSInsecureSkipVerify,
 	}
 
