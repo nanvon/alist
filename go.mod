@@ -9,7 +9,7 @@ require (
 	github.com/KirCute/sftpd-alist v0.0.12
 	github.com/ProtonMail/go-crypto v1.0.0
 	github.com/ProtonMail/gopenpgp/v2 v2.7.4
-	github.com/SheltonZhu/115driver v1.1.2
+	github.com/SheltonZhu/115driver v1.2.3-1
 	github.com/Xhofe/go-cache v0.0.0-20240804043513-b1a71927bc21
 	github.com/Xhofe/rateg v0.0.0-20230728072201-251a4e1adad4
 	github.com/alist-org/gofakes3 v0.0.7
@@ -74,7 +74,7 @@ require (
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e
 	golang.org/x/image v0.19.0
 	golang.org/x/net v0.38.0
-	golang.org/x/oauth2 v0.22.0
+	golang.org/x/oauth2 v0.30.0
 	golang.org/x/time v0.8.0
 	google.golang.org/appengine v1.6.8
 	gopkg.in/ldap.v3 v3.1.0
@@ -286,4 +286,4 @@ replace github.com/ProtonMail/go-proton-api => github.com/henrybear327/go-proton
 
 replace github.com/cronokirby/saferith => github.com/Da3zKi7/saferith v0.33.0-fixed
 
-replace github.com/SheltonZhu/115driver => github.com/okatu-loli/115driver v1.1.2
+replace github.com/SheltonZhu/115driver => github.com/okatu-loli/115driver v1.2.3-1
