@@ -756,9 +756,11 @@ func (d *Yun139) shareGetFiles(pCaID string) ([]model.Obj, error) {
 	files := make([]model.Obj, 0)
 	// 直接从 Data 中读取 CaLst
 	for _, catalog := range resp.Data.CaLst {
+		modTime, _ := time.ParseInLocation("20060102150405", catalog.UdTime, utils.CNLoc)
 		f := model.Object{
 			ID:       catalog.CaID,
 			Name:     catalog.CaName,
+			Modified: modTime,
 			IsFolder: true,
 		}
 		files = append(files, &f)
@@ -766,17 +768,19 @@ func (d *Yun139) shareGetFiles(pCaID string) ([]model.Obj, error) {
 	for _, content := range resp.Data.CoLst {
 		name := content.CoName
 		size := content.CoSize
-		// 如果是视频，强行加 .m3u8 后缀，并声明为 1MB 以匹配 Padding 逻辑
+		// Force .m3u8 suffix for videos and declare 1MB size for padding logic
 		if content.CoType == 3 || strings.HasSuffix(strings.ToLower(name), ".mp4") {
 			if !strings.HasSuffix(name, ".m3u8") {
 				name += ".m3u8"
 			}
-			size = 1024 * 1024 // 关键：声明为 1MB
+			size = 1024 * 1024 // Key: declare 1MB to match RangeReadCloser padding
 		}
+		modTime, _ := time.ParseInLocation("20060102150405", content.UdTime, utils.CNLoc)
 		f := model.Object{
-			ID:   content.CoID,
-			Name: name,
-			Size: size,
+			ID:       content.CoID,
+			Name:     name,
+			Size:     size,
+			Modified: modTime,
 		}
 		files = append(files, &f)
 	}
@@ -879,14 +883,14 @@ func (d *Yun139) rewriteM3U8(masterURL string) (string, error) {
 		"Referer":    "https://yun.139.com/",
 	}
 
-	// 1. 获取 Master M3U8
+	// 1. Get Master M3U8
 	resp, err := client.R().SetHeaders(headers).Get(masterURL)
 	if err != nil {
 		return "", err
 	}
 	masterContent := resp.String()
 
-	// 2. 找到子播放列表路径
+	// 2. Find sub-playlist path
 	var subRelPath string
 	lines := strings.Split(masterContent, "\n")
 	for i, line := range lines {
@@ -909,14 +913,11 @@ func (d *Yun139) rewriteM3U8(masterURL string) (string, error) {
 		}
 	}
 	if subRelPath == "" {
-		return "", fmt.Errorf("could not find sub-playlist")
-	}
-
-	// 3. 获取子播放列表内容
-	base, _ := url.Parse(masterURL)
-	if subRelPath == "" {
 		return "", fmt.Errorf("sub playlist not found in master m3u8")
 	}
+
+	// 3. Get sub-playlist content
+	base, _ := url.Parse(masterURL)
 	ref, _ := url.Parse(subRelPath)
 	subURL := base.ResolveReference(ref).String()
 
@@ -926,6 +927,7 @@ func (d *Yun139) rewriteM3U8(masterURL string) (string, error) {
 	}
 	subContent := resp.String()
 
+	// 4. Resolve relative TS paths to absolute URLs
 	subBase, _ := url.Parse(subURL)
 	subLines := strings.Split(subContent, "\n")
 	var finalLines []string
@@ -973,14 +975,14 @@ func (d *Yun139) shareGetLink(coID string) (*model.Link, error) {
 			return nil, err
 		}
 
-		// 核心逻辑：填充到 1MB，确保 AList 不报大小错误
+		// Core logic: pad to 1MB to ensure compatibility with AList's size validation
 		targetSize := int64(1024 * 1024)
 		contentBytes := []byte(m3u8Content)
 		if int64(len(contentBytes)) < targetSize {
 			padding := bytes.Repeat([]byte(" "), int(targetSize-int64(len(contentBytes))))
 			contentBytes = append(contentBytes, padding...)
 		} else {
-			// 如果 M3U8 竟然超过了 1MB（极罕见），则按实际大小截断（或报错）
+			// Truncate if M3U8 exceeds 1MB (extremely rare)
 			contentBytes = contentBytes[:targetSize]
 		}
 
@@ -988,9 +990,9 @@ func (d *Yun139) shareGetLink(coID string) (*model.Link, error) {
 			RangeReadCloser: &model.RangeReadCloser{
 				RangeReader: func(ctx context.Context, range_ http_range.Range) (io.ReadCloser, error) {
 					reader := bytes.NewReader(contentBytes)
-					// 处理 AList 的 Range 请求
+					// Handle AList Range requests
 					_, _ = reader.Seek(range_.Start, io.SeekStart)
-					// 包装成 ReadCloser
+					// Wrap as ReadCloser
 					return io.NopCloser(reader), nil
 				},
 			},

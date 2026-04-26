@@ -316,6 +316,7 @@ type RefreshTokenResp struct {
 type ShareCatalog struct {
 	CaID   string `json:"caID"`
 	CaName string `json:"caName"`
+	UdTime string `json:"udTime"`
 }
 
 type ShareContent struct {
@@ -323,6 +324,7 @@ type ShareContent struct {
 	CoName   string `json:"coName"`
 	CoSize   int64  `json:"coSize"`
 	CoType   int    `json:"coType"`
+	UdTime   string `json:"udTime"`
 	CoSuffix string `json:"coSuffix"`
 }
 
