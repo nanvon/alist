@@ -108,6 +108,7 @@ func InitialSettings() []model.SettingItem {
 		{Key: conf.DefaultRole, Value: defaultRoleID, Type: conf.TypeSelect, Group: model.SITE},
 		// newui settings
 		{Key: conf.UseNewui, Value: "false", Type: conf.TypeBool, Group: model.SITE},
+		{Key: conf.FrontendRememberSort, Value: "false", Type: conf.TypeBool, Group: model.SITE, Help: "Persist frontend list sorting in the browser. When disabled, backend/driver order is used until the user sorts manually in the current session."},
 		// style settings
 		{Key: conf.Logo, Value: "https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg", Type: conf.TypeText, Group: model.STYLE},
 		{Key: conf.Favicon, Value: "https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg", Type: conf.TypeString, Group: model.STYLE},
