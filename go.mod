@@ -47,7 +47,7 @@ require (
 	github.com/jlaffaye/ftp v0.2.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kdomanski/iso9660 v0.4.0
-	github.com/larksuite/oapi-sdk-go/v3 v3.3.1
+	github.com/larksuite/oapi-sdk-go/v3 v3.6.1
 	github.com/mark3labs/mcp-go v0.48.0
 	github.com/maruel/natural v1.1.1
 	github.com/meilisearch/meilisearch-go v0.27.2
