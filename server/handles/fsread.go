@@ -35,6 +35,7 @@ type DirReq struct {
 type ObjResp struct {
 	Id           string                     `json:"id"`
 	Path         string                     `json:"path"`
+	VirtualPath  string                     `json:"virtual_path"`
 	Name         string                     `json:"name"`
 	Size         int64                      `json:"size"`
 	IsDir        bool                       `json:"is_dir"`
@@ -65,6 +66,7 @@ type FsListResp struct {
 type ObjLabelResp struct {
 	Id           string                     `json:"id"`
 	Path         string                     `json:"path"`
+	VirtualPath  string                     `json:"virtual_path"`
 	Name         string                     `json:"name"`
 	Size         int64                      `json:"size"`
 	IsDir        bool                       `json:"is_dir"`
@@ -318,6 +320,7 @@ func toObjsResp(objs []model.Obj, parent string, encrypt bool) []ObjLabelResp {
 		resp = append(resp, ObjLabelResp{
 			Id:           obj.GetID(),
 			Path:         obj.GetPath(),
+			VirtualPath:  utils.FixAndCleanPath(stdpath.Join(parent, obj.GetName())),
 			Name:         obj.GetName(),
 			Size:         obj.GetSize(),
 			IsDir:        obj.IsDir(),
@@ -452,6 +455,7 @@ func FsGet(c *gin.Context) {
 		ObjResp: ObjResp{
 			Id:           obj.GetID(),
 			Path:         obj.GetPath(),
+			VirtualPath:  utils.FixAndCleanPath(reqPath),
 			Name:         obj.GetName(),
 			Size:         obj.GetSize(),
 			IsDir:        obj.IsDir(),
